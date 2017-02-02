@@ -11,9 +11,7 @@ structure(lrn14)
 #has two numbers: 183 and 60 (objects and variables)
 dim(lrn14)
 
-# something wrong with installations...
-install(dplyr)
-.libPaths()
+install.packages("GGally")
 library(dplyr)
 
 # questions related to deep, surface and strategic learning
@@ -34,5 +32,15 @@ lrn14$surf <- rowMeans(surface_columns)
 strategic_columns <- select(lrn14, one_of(strategic_questions))
 lrn14$stra <- rowMeans(strategic_columns)
 
+keep_columns <- c("gender","Age","Attitude", "deep", "stra", "surf", "Points")
+learning2014 <- select(lrn14, one_of(keep_columns))
 
+learning2014 <- filter(learning2014, Points > 0)
 
+dim(learning2014)
+write.csv(learning2014, file = "learning2014.csv")
+read.csv("learning2014.csv")
+
+str(learning2014)
+
+lrn14 <- read.csv("learning2014.csv")
