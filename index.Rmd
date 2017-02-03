@@ -1,6 +1,6 @@
 ---
 title: "IODS course project"
-author: "tihig"
+author: "tihig - CS-student with keen interest on Computational Data Science"
 output:
   html_document:
     theme: sandstone

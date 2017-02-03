@@ -62,7 +62,24 @@ library(dplyr)
 
 ```{r regression, echo=FALSE}
 
-my_model2 <- lm(Points ~ deep + stra + surf, data = lrn14)
+my_model2 <- lm(Points ~ Attitude, data = lrn14)
 summary(my_model2)
 
 ```
+
+Above here is the multiple regression models summary. First, let's look at the residuals. The values of residuals look normal distributed, which means that the values read from left to right would make a Gaus curve if drawn. 
+
+
+The stars on the right side of values represent the significance of the variables. The more stars, the more significant it is. Attitude has clearly a significance whereas surface, strategic and deep had no stars at all. These are not visible, since the description of exercise told to remove them.
+
+
+
+The multiple R squared of the model is approx. 0,19. The best value is 1, therefore this model is moderate and means that ~19% of the cause of exam points is due to attitude. Warning: remember that correlation is not always same as causality!
+
+```{r validation, echo=FALSE}
+par(mfrow = c(2,2))
+plot(my_model2, which = c(1:2,5))
+```
+
+The last charts are the diagnostics plots for the model. According to the values seen before, assumption is that the modle is moderate: some values fit the prediction and some do not.The suprising element here is that only chart that fits is Normal QQ.On the other hand, Residuals vs. Fitted and Residuals vs. Leverage resemble the multiple R squared value of ~19%. This conludes that fact that this model is neither good or bad. 
+
