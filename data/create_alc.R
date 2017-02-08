@@ -42,5 +42,5 @@ alc <- mutate(alc, high_use = alc_use > 2)
 
 glimpse(alc)
 
-write.csv(alc, "alc.csv", row.names = TRUE)
+write.csv(alc, "alc.csv", row.names = F)
 
