@@ -8,6 +8,7 @@ library(tidyr); library(dplyr); library(ggplot2)
 variables <- c("high_use","failures","studytime","health","famsup")
 alc_hyp <- select(alc, one_of(variables))
 
+library(gridExtra)
 ```
 In this analysis a data chart of student alcohol consumption in Portugal is used.The chart has the following variables:  school,sex, age,address, famsize, Pstatus,
 
@@ -30,16 +31,14 @@ Over 300 of the student have no failures on their courses and under a hundred st
 
 ```{r boxplots, echo=FALSE}
 
-g1 <- ggplot(alc_hyp, aes(x=high_use, y= failures, col=high_use), geom_boxplot())+ geom_boxplot() + ggtitle("title here")
-g2 <- ggplot(alc_hyp, aes(x=high_use, y= studytime, col=high_use)) + geom_boxplot() + ggtitle("title here")
-g3 <- ggplot(alc_hyp, aes(x=high_use, y= famsup, col=high_use))+ geom_boxplot() + ggtitle("title here")
-g4 <- ggplot(alc_hyp, aes(x=high_use, y= health, col=high_use))+ geom_boxplot() + ggtitle("title here")
 
-par(mfrow=c(2,2))
-g1 
-g2 
-g3 
-g4 
+
+g1 <- ggplot(alc_hyp, aes(x=high_use, y= failures, col=high_use), geom_boxplot())+ geom_boxplot() + ggtitle("Failures of courses vs.High use")
+g2 <- ggplot(alc_hyp, aes(x=high_use, y= studytime, col=high_use)) + geom_boxplot() + ggtitle("Study time vs.High use")
+g3 <- ggplot(alc_hyp, aes(x=high_use, y= famsup, col=high_use))+ geom_boxplot() + ggtitle("Family support vs.High use ")
+g4 <- ggplot(alc_hyp, aes(x=high_use, y= health, col=high_use))+ geom_boxplot() + ggtitle("Own health vs.High use")
+
+grid.arrange(g1, g2, g3, g4, ncol=2, nrow =2)
 
 ```
 
