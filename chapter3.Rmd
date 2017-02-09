@@ -1,3 +1,140 @@
 #Chapter 3 analysis
 
-Here I am!
+```{r setupping, echo=FALSE, include=FALSE}
+library(dplyr)
+alc <- read.csv("data/alc.csv")
+
+library(tidyr); library(dplyr); library(ggplot2)
+variables <- c("high_use","failures","studytime","health","famsup")
+alc_hyp <- select(alc, one_of(variables))
+
+```
+In this analysis a data chart of student alcohol consumption in Portugal is used.The chart has the following variables:  school,sex, age,address, famsize, Pstatus,
+
+For this analysis, I'll choose 4 interesting variables and present a hypothesis on how they correlate with high/low alchohol consupmtion. First one to choose is failure and the assumpiton is that high failure correlate with high alcohol consumption. Also, my hypothesis is that low study time correlates with high alcohol consupmtion. The next ones I assume correlate with low alcohol conspumtion to see a better view of the data: higher health and family educational support correlates with lower alcohol consumption.
+
+
+Let's look at the variables individually. These variables are now extraced to their own table, so we can look them with glimpse- function.
+
+```{r variables, echo=FALSE}
+glimpse(alc_hyp)
+
+```
+
+```{r charts, echo=FALSE}
+gather(alc_hyp) %>% glimpse
+gather(alc_hyp) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+```
+
+Over 300 of the student have no failures on their courses and under a hundred student have some failures according to the first chart. Family support is more divided. More students get family supprort thatn not, but the amount of people not getting support is as high as over 125 students. Even more divided is the section for health. Clearly the biggest number of answers got 5 = very good, but the proprotion of student that answered either 1= Very bad or 2 = bad is combined almost half of the amount of students that answered 5. In alcohol consumption, our key variable here, over 100 students are high users (calculated as the mean of weekend and daily use).
+
+```{r boxplots, echo=FALSE}
+
+g1 <- ggplot(alc_hyp, aes(x=high_use, y= failures, col=high_use), geom_boxplot())+ geom_boxplot() + ggtitle("title here")
+g2 <- ggplot(alc_hyp, aes(x=high_use, y= studytime, col=high_use)) + geom_boxplot() + ggtitle("title here")
+g3 <- ggplot(alc_hyp, aes(x=high_use, y= famsup, col=high_use))+ geom_boxplot() + ggtitle("title here")
+g4 <- ggplot(alc_hyp, aes(x=high_use, y= health, col=high_use))+ geom_boxplot() + ggtitle("title here")
+
+par(mfrow=c(2,2))
+g1 
+g2 
+g3 
+g4 
+
+```
+
+Here we can see that some of our models are not good as boxplots. Family support and failures show only lines, which means they do not correlate in this model. On the other hand, health and study time are vieweable and show some correlation. People who are not high users answered that they spend more time studying than high users. What is suprising here is that both high users and non- high users have the same values of answers in health, meaning regardless of alcohol usage level they feel enough healthy.
+
+Family support is not good to be viewed as boxplot. There is no valuable information in here, since the distribution is not vieweable. The expectation is that failres correlate, but in this model it seems that this is not the case.
+
+```{r glm, echo=FALSE}
+
+
+m1 <- glm(high_use ~ failures + health + famsup + studytime, data = alc_hyp, family = "binomial")
+
+#summary
+summary(m1)
+
+
+
+```
+
+Here is the summary of logistic regression preformed as seen in Call- function. Clearly the only coefficents that are statistically significant here are study time and failures. Between those two study time is clearly most significant.
+
+
+Let's drop the unsignificant values and see what the values look afterwards (also dropping the variables famsup and health from our test table).
+```{r glm2, echo=FALSE}
+variables <- c("high_use","failures","studytime")
+alc_hyp <- select(alc, one_of(variables))
+
+
+m <- glm(high_use ~ failures + studytime, data = alc_hyp, family = "binomial")
+
+#summary
+summary(m)
+
+
+
+```
+Now the models coefficents are more significant and we can continue exploring this model.
+
+
+```{r odds ratio, echo=FALSE}
+OR <- coef(m) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(m) %>% exp
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+```
+
+
+
+```{r predict, echo=FALSE}
+probabilities <- predict(m, type = "response")
+
+alc_hyp <- mutate(alc_hyp, probability = probabilities)
+
+alc_hyp <- mutate(alc_hyp, prediction = probabilities > 0.5)
+
+table(high_use = alc_hyp$high_use, prediction = probabilities > 0.5)
+
+g <- ggplot(alc_hyp, aes(x = probability, y = high_use, col= prediction))
+g + geom_point()
+
+```
+
+
+In the upper table and chart we can see the comparison of prediction of high use and current datas high use.
+From the chart it is clear that they correlate well, which suggests that this predicition is fairly accurate.
+On the other hand, 
+
+```{r accuracy, echo=FALSE}
+
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+
+loss_func(class = alc_hyp$high_use, prob = alc_hyp$probability)
+
+
+```
+
+
+In the above is the number of average false prediction in this model. This means that almost everey 1/3 of predictions in this model are false. The performance of this model is not as good as expected and compared to simple guessing tactique this model is slightly more accurate.
+
+```{r crossvalid, echo=FALSE}
+
+library(boot)
+cv <- cv.glm(data = alc_hyp, cost = loss_func, glmfit = m, K = 10)
+
+
+
+cv$delta[1]
+```
+Last here is the 10-fold cross validation performed for this table. Unfortunately this model does not have smaller prediction error as in the DataCapm exercises ( approx. 0.26).
+
+
