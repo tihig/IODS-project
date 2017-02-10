@@ -5,14 +5,18 @@ library(dplyr)
 alc <- read.csv("data/alc.csv")
 
 library(tidyr); library(dplyr); library(ggplot2)
-variables <- c("high_use","failures","studytime","health","famsup")
+variables <- c("high_use","failures","studytime","health","absences")
 alc_hyp <- select(alc, one_of(variables))
 
 library(gridExtra)
 ```
-In this analysis a data chart of student alcohol consumption in Portugal is used.The chart has the following variables:  school,sex, age,address, famsize, Pstatus,
+In this analysis a data chart of student alcohol consumption in Portugal is used in examination of it's previously counted variable high use. In this chapter I'll choose 4 interesting variables and present a hypothesis on how they correlate with high/low alchohol consupmtion. The variables I choose are failure, study time, health and absences from school. Here are the hypothesis I will study through this chapter:
 
-For this analysis, I'll choose 4 interesting variables and present a hypothesis on how they correlate with high/low alchohol consupmtion. First one to choose is failure and the assumpiton is that high failure correlate with high alcohol consumption. Also, my hypothesis is that low study time correlates with high alcohol consupmtion. The next ones I assume correlate with low alcohol conspumtion to see a better view of the data: higher health and family educational support correlates with lower alcohol consumption.
+H1: High alcohol consumption affects amount of course failures.
+H2: More time spent on studying implys less alcohol consupmtion
+H3: Higher health indicates less alcohol consumption.
+H4: High amount of absences are related to high alcohol consumption.
+
 
 
 Let's look at the variables individually. These variables are now extraced to their own table, so we can look them with glimpse- function.
@@ -27,7 +31,9 @@ gather(alc_hyp) %>% glimpse
 gather(alc_hyp) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
 ```
 
-Over 300 of the student have no failures on their courses and under a hundred student have some failures according to the first chart. Family support is more divided. More students get family supprort thatn not, but the amount of people not getting support is as high as over 125 students. Even more divided is the section for health. Clearly the biggest number of answers got 5 = very good, but the proprotion of student that answered either 1= Very bad or 2 = bad is combined almost half of the amount of students that answered 5. In alcohol consumption, our key variable here, over 100 students are high users (calculated as the mean of weekend and daily use).
+Over 300 of the student have no failures on their courses and under a hundred student have some failures according to the first chart. absences Even more divided is the section for health. Clearly the biggest number of answers got 5 = very good, but the proprotion of student that answered either 1= Very bad or 2 = bad is combined almost half of the amount of students that answered 5. In alcohol consumption, our key variable here, over 100 students are high users (calculated as the mean of weekend and daily use).
+
+There can be no further conclusions divided from this set of data, so let's dig deeper.
 
 ```{r boxplots, echo=FALSE}
 
@@ -35,21 +41,23 @@ Over 300 of the student have no failures on their courses and under a hundred st
 
 g1 <- ggplot(alc_hyp, aes(x=high_use, y= failures, col=high_use), geom_boxplot())+ geom_boxplot() + ggtitle("Failures of courses vs.High use")
 g2 <- ggplot(alc_hyp, aes(x=high_use, y= studytime, col=high_use)) + geom_boxplot() + ggtitle("Study time vs.High use")
-g3 <- ggplot(alc_hyp, aes(x=high_use, y= famsup, col=high_use))+ geom_boxplot() + ggtitle("Family support vs.High use ")
+g3 <- ggplot(alc_hyp, aes(x=high_use, y= absences, col=high_use))+ geom_boxplot() + ggtitle("Absences vs.High use ")
 g4 <- ggplot(alc_hyp, aes(x=high_use, y= health, col=high_use))+ geom_boxplot() + ggtitle("Own health vs.High use")
 
 grid.arrange(g1, g2, g3, g4, ncol=2, nrow =2)
 
 ```
 
-Here we can see that some of our models are not good as boxplots. Family support and failures show only lines, which means they do not correlate in this model. On the other hand, health and study time are vieweable and show some correlation. People who are not high users answered that they spend more time studying than high users. What is suprising here is that both high users and non- high users have the same values of answers in health, meaning regardless of alcohol usage level they feel enough healthy.
+Here we can see that one from our models is not good (atleast as boxplot). Failures show only two lines and is therefore hard to make conclusion on one way or another.
 
-Family support is not good to be viewed as boxplot. There is no valuable information in here, since the distribution is not vieweable. The expectation is that failres correlate, but in this model it seems that this is not the case.
+On the other hand, health, study time and absence are vieweable and show some concluding evidence. People who are not high users answered that they spend more time studying than high users. Also, people who are high users have more absences compared to non-high users. What is suprising here is that both high users and non- high users have the same values of answers in health, meaning regardless of alcohol usage level they feel enough healthy.
+
+Let's still keep the values here to see if the chosen plot type had effect on the results. Next, I will make a model using logistic regression. This type of analysis style is good, if variables have a fair amount of two- digit variablse (only values true/false or yes/no eg.).
 
 ```{r glm, echo=FALSE}
 
 
-m1 <- glm(high_use ~ failures + health + famsup + studytime, data = alc_hyp, family = "binomial")
+m1 <- glm(high_use ~ failures + health + absences + studytime, data = alc_hyp, family = "binomial")
 
 #summary
 summary(m1)
@@ -58,16 +66,16 @@ summary(m1)
 
 ```
 
-Here is the summary of logistic regression preformed as seen in Call- function. Clearly the only coefficents that are statistically significant here are study time and failures. Between those two study time is clearly most significant.
+Here is the summary of logistic regression preformed as seen in Call- function. Clearly the only coefficents that are statistically significant here are study time, failures and absences. Between those three study time and absences are clearly most significant.
 
 
-Let's drop the unsignificant values and see what the values look afterwards (also dropping the variables famsup and health from our test table).
+Let's drop the unsignificant variable health and see what the variables look afterwards.
 ```{r glm2, echo=FALSE}
-variables <- c("high_use","failures","studytime")
+variables <- c("high_use","failures","studytime", "absences")
 alc_hyp <- select(alc, one_of(variables))
 
 
-m <- glm(high_use ~ failures + studytime, data = alc_hyp, family = "binomial")
+m <- glm(high_use ~ absences + failures + studytime, data = alc_hyp, family = "binomial")
 
 #summary
 summary(m)
@@ -75,7 +83,7 @@ summary(m)
 
 
 ```
-Now the models coefficents are more significant and we can continue exploring this model.
+Now the models coefficents are more significant and we can continue exploring this model as a valid model.
 
 
 ```{r odds ratio, echo=FALSE}
@@ -88,7 +96,8 @@ CI <- confint(m) %>% exp
 cbind(OR, CI)
 ```
 
-
+In here are listed the odds ratio values calculated for the model previously made.
+In here we can see that our predictions from before get a slight twist: for people with alcohol use it's 1.5 times more likely to have high course failure count. People who are high users also have high chance of having absences as well. In this odds ratio model, our previous findings about study time are not shown to be that relevant, although still they can be accounted here: high user students have 0.6 times chance on spending loads of time studying. This is more than expected before.
 
 ```{r predict, echo=FALSE}
 probabilities <- predict(m, type = "response")
@@ -105,9 +114,8 @@ g + geom_point()
 ```
 
 
-In the upper table and chart we can see the comparison of prediction of high use and current datas high use.
-From the chart it is clear that they correlate well, which suggests that this predicition is fairly accurate.
-On the other hand, 
+In the upper table and chart we can see the comparison of prediction of high use and current datas high use. The chart is pretty scattered and shows that this model is not the best one to be viewed with only two variables. 
+
 
 ```{r accuracy, echo=FALSE}
 
@@ -123,7 +131,7 @@ loss_func(class = alc_hyp$high_use, prob = alc_hyp$probability)
 ```
 
 
-In the above is the number of average false prediction in this model. This means that almost everey 1/3 of predictions in this model are false. The performance of this model is not as good as expected and compared to simple guessing tactique this model is slightly more accurate.
+In the above is the size of average false prediction in this model. This means that approximately 27% of the predictions this model makes are false. The performance of this model is not as good as expected in the beginning (hypothesis) and compared to simple guessing tactique this model is slightly more accurate.
 
 ```{r crossvalid, echo=FALSE}
 
@@ -134,6 +142,6 @@ cv <- cv.glm(data = alc_hyp, cost = loss_func, glmfit = m, K = 10)
 
 cv$delta[1]
 ```
-Last here is the 10-fold cross validation performed for this table. Unfortunately this model does not have smaller prediction error as in the DataCapm exercises ( approx. 0.26).
+Last here is the 10-fold cross validation performed for this table. Unfortunately this model does not have smaller prediction error as in the DataCamp exercises ( approx. 0.26), but still is fairly close to it.
 
 
