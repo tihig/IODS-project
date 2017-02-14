@@ -1,0 +1,81 @@
+# Chapter 4: Clustering and classification
+
+```{r setup4, include=FALSE}
+library(MASS)
+library(tidyverse)
+library(corrplot)
+data("Boston")
+
+```
+In this chapter I will look into closely to Boston dataframe that has 506 rows and 14 columns. The dataframe contains various types of information about the city, e.g crimerate (crim), full value property tax rate per 10000$ (tax) and pupil- teacher ratio (pratio). These are factors that effect the housing values in the area. Full discription of the data frame can be found here: https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html 
+
+```{r columns, echo=FALSE}
+colnames(Boston)
+
+```
+
+Below is a graphical overview done with pairs- function and the full summary of all variables. 
+
+
+```{r overview4, echo=FALSE}
+pairs(Boston)
+summary(Boston)
+
+
+```
+From the summary, we can see that all the variables in this data frame are numeric. Chas is a binary variable with values 1 or 0. 
+
+
+```{r pressure, echo=FALSE}
+
+cor_matrix<-cor(Boston) %>% round(digits= 2)
+
+corrplot(cor_matrix, type="upper", cl.pos="b", tl.pos="d", tl.cex = 0.6, method="circle")
+```
+
+Above is the correlation chart of the values. Size of the circle varies according to correlation coefficents. The color of the circle indicates whether it is negatively or positively correlating.
+
+In here it's visible that rad (index of accessibility to radial highways) correlates positively to dis (weighted mean of distances to five Boston employment centres) and lstat(lower status of the population (percent)) correlates positively with medv (median value of owner-occupied homes in \$1000s). 
+
+##Standardizing 
+
+```{r scale, echo=FALSE}
+boston_scaled <- scale(Boston)
+summary(boston_scaled)
+class(boston_scaled)
+boston_scaled <- as.data.frame(boston_scaled)
+```
+Above here is the summary of Boston data frame after standardizing it with scale-function. Compared to previous summary, it is clear that the values have changed. All the values have been minimized in size, which can bee seen best by looking at the min- values. All of them are negative, where as previously they had positive values. Also a remarkable change is that median values have all turned to zeros. This has to do with the standardization function. In standadrization the value, standard score, is counted from function (x- mean)/sd, which leads to values above mean. 
+
+```{r categorial, echo=FALSE}
+scaled_crim <- boston_scaled$crim
+
+summary(scaled_crim)
+
+bins <- quantile(scaled_crim)
+
+crime <- cut(scaled_crim, breaks = bins, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
+
+table(crime)
+
+boston_scaled <- dplyr::select(boston_scaled, -crim)
+boston_scaled <- data.frame(boston_scaled, crime)
+```
+
+```{r divide, echo=FALSE}
+n <- nrow(boston_scaled)
+
+ind <- sample(n,  size = n * 0.8)
+
+train <- boston_scaled[ind,]
+test <- boston_scaled[-ind,]
+
+print("Training set")
+nrow(train)
+print("Testing set")
+nrow(test)
+``` 
+
+I divided the scaled data frame into two sets: test and training set. The training set has 80% of the data from Boston scaled and the total number of rows for both sets is printed here.
+
+##Linear Discriminant Analysis (LDA)

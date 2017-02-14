@@ -1,10 +1,5 @@
-# Chapter 2: Analysis
+# Chapter 2: Regression and Model Validation
 
-*Describe the work you have done this week and summarize your learning.*
-
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
 In here, I first read the content of the table to variable lrn14 from given URL. The table has information of "Johdatus tilastotieteeseen"- courses survey. Let's look at the overall structure of the table.
 ```{r setup, echo=FALSE, include=FALSE}
 library(dplyr)

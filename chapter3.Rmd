@@ -1,4 +1,4 @@
-#Chapter 3 analysis
+#Chapter 3: Logistic Regression
 
 ```{r setupping, echo=FALSE, include=FALSE}
 library(dplyr)
