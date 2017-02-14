@@ -1,5 +1,6 @@
 # Chapter 2: Regression and Model Validation
 
+##Introduction
 In here, I first read the content of the table to variable lrn14 from given URL. The table has information of "Johdatus tilastotieteeseen"- courses survey. Let's look at the overall structure of the table.
 ```{r setup, echo=FALSE, include=FALSE}
 library(dplyr)
@@ -47,6 +48,8 @@ summary(lrn14$Points)
 The exact information is easier viewed from the summaries of the columns. In the overview it was hard to determine what was the ratio of genders, but in here we can see that there were more female participants than male. 
 
 And what comes to the results, some questions did get maximum points from the scale (e.g Strategic and Attitude). Most of the mean values are above the mean of the  in total. 
+
+## Regression model
 ```{r setup2, echo=FALSE, include=FALSE}
 
 library(ggplot2)
@@ -70,6 +73,8 @@ The stars on the right side of values represent the significance of the variable
 
 
 The multiple R squared of the model is approx. 0,19. The best value is 1, therefore this model is moderate and means that ~19% of the cause of exam points is due to attitude. Warning: remember that correlation is not always same as causality!
+
+##Diagnostic plots
 
 ```{r validation, echo=FALSE}
 par(mfrow = c(2,2))

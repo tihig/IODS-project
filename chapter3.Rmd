@@ -8,8 +8,11 @@ library(tidyr); library(dplyr); library(ggplot2)
 variables <- c("high_use","failures","studytime","health","absences")
 alc_hyp <- select(alc, one_of(variables))
 
+
 library(gridExtra)
 ```
+## Introduction and hypothesis
+
 In this analysis a data chart of student alcohol consumption in Portugal is used in examination of it's previously counted variable high use. In this chapter I'll choose 4 interesting variables and present a hypothesis on how they correlate with high/low alchohol consupmtion. The variables I choose are failure, study time, health and absences from school. Here are the hypothesis I will study through this chapter:
 
 H1: High alcohol consumption affects amount of course failures.
@@ -52,7 +55,9 @@ Here we can see that one from our models is not good (atleast as boxplot). Failu
 
 On the other hand, health, study time and absence are vieweable and show some concluding evidence. People who are not high users answered that they spend more time studying than high users. Also, people who are high users have more absences compared to non-high users. What is suprising here is that both high users and non- high users have the same values of answers in health, meaning regardless of alcohol usage level they feel enough healthy.
 
-Let's still keep the values here to see if the chosen plot type had effect on the results. Next, I will make a model using logistic regression. This type of analysis style is good, if variables have a fair amount of two- digit variablse (only values true/false or yes/no eg.).
+Let's still keep the values here to see if the chosen plot type had effect on the results. Next, I will make a model using logistic regression. This type of analysis style is good, if variables have a fair amount of two- digit variables (only values true/false or yes/no eg.).
+
+## Logistic Regression
 
 ```{r glm, echo=FALSE}
 
@@ -99,6 +104,8 @@ cbind(OR, CI)
 In here are listed the odds ratio values calculated for the model previously made.
 In here we can see that our predictions from before get a slight twist: for people with alcohol use it's 1.5 times more likely to have high course failure count. People who are high users also have high chance of having absences as well. In this odds ratio model, our previous findings about study time are not shown to be that relevant, although still they can be accounted here: high user students have 0.6 times chance on spending loads of time studying. This is more than expected before.
 
+## Prediction
+
 ```{r predict, echo=FALSE}
 probabilities <- predict(m, type = "response")
 
@@ -132,6 +139,8 @@ loss_func(class = alc_hyp$high_use, prob = alc_hyp$probability)
 
 
 In the above is the size of average false prediction in this model. This means that approximately 27% of the predictions this model makes are false. The performance of this model is not as good as expected in the beginning (hypothesis) and compared to simple guessing tactique this model is slightly more accurate.
+
+## 10-fold validation
 
 ```{r crossvalid, echo=FALSE}
 
