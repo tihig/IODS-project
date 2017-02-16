@@ -4,6 +4,8 @@
 library(MASS)
 library(tidyverse)
 library(corrplot)
+library(ggplot2)
+library(GGally)
 data("Boston")
 
 ```
@@ -70,12 +72,97 @@ ind <- sample(n,  size = n * 0.8)
 train <- boston_scaled[ind,]
 test <- boston_scaled[-ind,]
 
+
 print("Training set")
 nrow(train)
 print("Testing set")
 nrow(test)
 ``` 
 
-I divided the scaled data frame into two sets: test and training set. The training set has 80% of the data from Boston scaled and the total number of rows for both sets is printed here.
+I divided the scaled data frame into two sets: test and training set. The training set has 80% of the data from Boston scaled and the total number of rows for both sets is printed here. 
 
 ##Linear Discriminant Analysis (LDA)
+
+In this section, I fitted a Linear Discriminant Analysis (LDA, in short) by choosing categorial variable crime as target variable and rest as explanatory in R:s lda- function. 
+
+```{r LDA, echo=FALSE}
+lda.fit <- lda(crime ~., data = train)
+
+lda.fit
+
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+
+classes <- as.numeric(train$crime)
+
+plot(lda.fit, dimen = 2, col= classes, pch=classes)
+lda.arrows(lda.fit, myscale = 2)
+
+```
+
+
+ 
+```{r LDAwo, echo=FALSE}
+correct_classes <- test$crime
+test <- dplyr::select(test, -crime)
+
+lda.pred <- predict(lda.fit, newdata = test)
+
+table(correct = correct_classes, predicted = lda.pred$class)
+
+```
+
+From test data set the variable crime has been dropped and saved separately. Above is the prediction run on our LDA model. From predicted values, 67/102 were predicted the same as the correct values. The best prediction was done on high- values: 22/24. As seen from the graph before, this was expected, since high values differ from the rest of the values. Worst prediction was done on medium low- values 13/29, which is approximately 44% predicted correctly. Looking back at the graph above, medium low- values are most mixed with low and medium high- values, making predicting difficult.
+
+## K-means
+
+Unlike LDA, K-means is a clustering method that divides observations into clusters. The number of clusters is determined beforehand by adding number of centers as attribute to K-means function.
+
+First, I reloaded the Boston data frame and scaled it again. Inorder execute K-means, the distances of observation need to be calculated. I used here eucledian, since it's the most popular distance measurement type. 
+```{r reload, echo=FALSE}
+data("Boston")
+boston_scaled <- scale(Boston)
+dist_eu <- dist(boston_scaled)
+km <-kmeans(dist_eu, centers = 15)
+
+pairs(Boston, col = km$cluster)
+
+```
+
+
+Above is the plot of Boston data frame coloured with K-means clusters. K-means is ran here with 15 clusters and this looks like not being an optimal amount for it. Let's determine the correct amount of clusters using the total of within cluster sum of squares (WCSS).
+
+
+```{r wcss, echo=FALSE}
+set.seed(123)
+
+dist_eu <- dist(Boston)
+
+k_max <- 15
+
+twcss <- sapply(1:k_max, function(k){kmeans(dist_eu, k)$tot.withinss})
+plot(1:k_max, twcss, type='b')
+
+``` 
+
+From the visualization of the result, we can see that the biggest drop of total WCSS is when the amount of clusters is 2. This means that 2 clusters is the best amount for our data frame. 
+
+```{r kmeans, echo=FALSE}
+
+km <-kmeans(dist_eu, centers = 2)
+
+pairs(Boston, col = km$cluster)
+
+```
+
+The new visualization with only two clusters looks different to the one drawn before. Crime rate clearly (with a few exceptions) belongs to one cluster seen in red and proportion of residential owned lots (zn) to other cluster coloured black. To the same cluster with crime rate belong most of the observations from lower status of population (lstat), proportion of blacks (black) and nitrogen oxide concentration (nox). This means that part of town with high crime rate has also most likely lower status population, black people and high amounts of nitrogen oxide in the air. Areas with high amount of residential owned plots are likely to have accessibility to radial highways (rad), high full value tax rate (tax) and more pupils towards one teacher.
+
+
+
+
