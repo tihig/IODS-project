@@ -10,10 +10,15 @@ library(plotly)
 data("Boston")
 
 ```
-In this chapter I will look into closely to Boston dataframe that has 506 rows and 14 columns. The dataframe contains various types of information about the city, e.g crimerate (crim), full value property tax rate per 10000$ (tax) and pupil- teacher ratio (pratio). These are factors that effect the housing values in the area. Full discription of the data frame can be found here: https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html 
+
+## Introduction
+
+In this chapter I will look into closely to Boston dataframe that has 506 rows and 14 columns. The dataframe contains information about factors effecting housing values in suburban areas of Boston. These factors (further addessed as variables) include e.g crimerate (crim), full value property tax rate per 10000$ (tax) and pupil- teacher ratio (pratio). Full description of the data frame can be found here: [Housing Values in Suburbs of Boston](https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/Boston.html )
 
 ```{r columns, echo=FALSE}
 colnames(Boston)
+str(Boston)
+dim(Boston)
 
 ```
 
@@ -26,7 +31,7 @@ summary(Boston)
 
 
 ```
-From the summary, we can see that all the variables in this data frame are numeric. Chas is a binary variable with values 1 or 0. 
+From the summary, we can see that all the variables in this data frame are numeric. All the data in this frame is percents, proprotions, mean or median values or calculated with their own function. For example Medv is the median value of homes in 1000$s and black is the amount of blacks calculated with the following function: 1000(Bk - 0.63)^2, Bk is the proportion of blacks per town. As an exception to others, Charles River dummy variable (Chas) is a binary variable with values 1 or 0 indicating if the river crosses the area or not.
 
 
 ```{r pressure, echo=FALSE}
@@ -48,7 +53,7 @@ summary(boston_scaled)
 class(boston_scaled)
 boston_scaled <- as.data.frame(boston_scaled)
 ```
-Above here is the summary of Boston data frame after standardizing it with scale-function. Compared to previous summary, it is clear that the values have changed. All the values have been minimized in size, which can bee seen best by looking at the min- values. All of them are negative, where as previously they had positive values. Also a remarkable change is that median values have all turned to zeros. This has to do with the standardization function. In standadrization the value, standard score, is counted from function (x- mean)/sd, which leads to values above mean. 
+Above here is the summary of Boston data frame after standardizing it with scale-function. Compared to previous summary, it is clear that the values have changed. All the values have been minimized in size, which can bee seen best by looking at the min- values. All of them are negative, where as previously they had positive values. Also a remarkable change is that median values have all turned to zeros. This has to do with the standardization function. In standadrization the value, standard score, is counted from function (x- mean)/sd, which leads to no mean values at all. Here is a helpful post about understanding scale function: [Understanding scale in r](http://stackoverflow.com/questions/20256028/understanding-scale-in-r)
 
 ```{r categorial, echo=FALSE}
 scaled_crim <- boston_scaled$crim
@@ -108,7 +113,7 @@ lda.arrows(lda.fit, myscale = 2)
 ```
 
 
-The graph of LDA model shows that clearly high crime rate stands out from the rest of the data.
+The graph of LDA model shows that clearly high crime rate stands out from the rest of the data. Also, index of accessibility to radial highways (rad) is separated from the rest of the arrows and pointing towards high value of crime rate. 
 
  
 ```{r LDAwo, echo=FALSE}
@@ -139,7 +144,7 @@ pairs(Boston, col = km$cluster)
 ```
 
 
-Above is the plot of Boston data frame coloured with K-means clusters. K-means is ran here with 15 clusters and this looks like not being an optimal amount for it. Let's determine the correct amount of clusters using the total of within cluster sum of squares (WCSS).
+Above is the plot of Boston data frame coloured with K-means clusters. K-means is ran here with 15 clusters. The graph is difficult to interpret, which could be because of wrong number of clusters. Let's determine the correct amount of clusters using the total of within cluster sum of squares (WCSS).
 
 
 ```{r wcss, echo=FALSE}
@@ -196,6 +201,16 @@ lda.arrows(lda.fit2, myscale = 2)
 
 ``` 
 
+The graph above is LDA model with the K-means clusters as target variable and Boston data frame as data. The variable with the longest arrow is nitrogen oxides concentration (nox) and it divides the data frames observations into two separate areas. From the other variables it is harder to say which one could be influential linear separator, so let's look at the graphs vectors more closely.
+
+```{r bonusclose, echo=FALSE}
+plot(lda.fit2, dimen = 2, col= classes, pch=classes)
+lda.arrows(lda.fit2, myscale = 10)
+
+```
+
+The two variables showing to be linear separators are variables index of accessibility to radial highways (rad) and Charles River dummy variable (chas) that separate the observations from cluster one from the rest of the group. 
+
 
 ##Super bonus
 
@@ -217,4 +232,4 @@ plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, 
 
 ```
 
-As a super bonus task I ran the given code that makes the three matrix products from previous LDA (not the one in Bonus task) and inserts the into plot_ly function. The result is this beautiful 3D graph. 
+As a super bonus task I ran the given code that makes the three matrix products from previous LDA (not the one in Bonus task) and inserts the into plot_ly function. The result is this beautiful 3D graph. If you move your mouse over the observations, you can see their exact coordinates.

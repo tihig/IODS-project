@@ -5,6 +5,6 @@ date: "24 tammikuuta 2017"
 output: html_document
 ---
 
-*In this course we will get know the tools and methods for open data science. The tools in this course include R, Rmarkdown and Github and we will also learn programming with R from Datacamp exercises. This is a really cool course, so join in!*
+*In this course we will get know the tools and methods for open data science. The tools in this course include R, Rmarkdown and Github and we will also learn programming with R from Datacamp exercises. So what are you waiting for, join in!*
 
-[link](https://tihig.github.io/IODS-project/)
+[Course diary](https://tihig.github.io/IODS-project/)

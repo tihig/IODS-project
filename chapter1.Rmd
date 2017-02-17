@@ -5,4 +5,4 @@
 
 
 
-[Course diary- tihig](https://github.com/tihig/IODS-project)
+[Github-repo](https://github.com/tihig/IODS-project)
