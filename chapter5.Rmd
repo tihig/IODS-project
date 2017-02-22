@@ -1,0 +1,22 @@
+# Chapter 5: Dimensionality reduction techniques
+
+```{r setup5, echo=FALSE, include=FALSE}
+human <- read.csv("data/human.csv")
+```
+
+In this chapter I will wrangle and analyse data from UNs Development programs Human Development Index (HDI) and Gender Inequality Index data frames. These are combined together to be a data frame named "Human". More about the data frame here: [UN development programs: HDI](http://hdr.undp.org/en/content/human-development-index-hdi)
+
+```{r human, echo=FALSE}
+str(human)
+dim(human)
+```
+
+
+The structure of the frame shows the 19 variables of this frame. The variables with suffix .hd or .gii are related to the frames HDI and GII. F and M indicate genders in variable names and edu education. 
+## Including Plots
+
+
+```{r pressure, echo=FALSE}
+
+```
+
