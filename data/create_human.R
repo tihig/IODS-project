@@ -37,6 +37,8 @@ dim(human)
 
 write.csv(human, file="human.csv", row.names= FALSE)
 
+human<- read.csv("human.csv")
+colnames(human)
 # Chapter 5 begins here
 
 colnames(human)
@@ -61,4 +63,7 @@ dim(human_)
 human <- human_
 
 write.csv(human, file="human.csv", row.names= TRUE)
+human<- read.csv("human.csv")
+colnames(human)
 
+install.packages("FactoMineR")

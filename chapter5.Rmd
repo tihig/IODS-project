@@ -1,22 +1,115 @@
 # Chapter 5: Dimensionality reduction techniques
 
 ```{r setup5, echo=FALSE, include=FALSE}
+
+library(dplyr)
+library(tidyr); library(dplyr); library(ggplot2)
+library(stringr)
+library(FactoMineR)
+library(ggplot2)
+
 human <- read.csv("data/human.csv")
+
 ```
+
+## Introduction
 
 In this chapter I will wrangle and analyse data from UNs Development programs Human Development Index (HDI) and Gender Inequality Index data frames. These are combined together to be a data frame named "Human". More about the data frame here: [UN development programs: HDI](http://hdr.undp.org/en/content/human-development-index-hdi)
 
 ```{r human, echo=FALSE}
 str(human)
 dim(human)
+colnames(human)
 ```
 
 
-The structure of the frame shows the 19 variables of this frame. The variables with suffix .hd or .gii are related to the frames HDI and GII. F and M indicate genders in variable names and edu education. 
-## Including Plots
+The structure of the frame shows the 9 variables of this frame. The variables in this data frame have been chosen in the data wrangling excercise. X is the row names that are the names of the countries. 
 
 
-```{r pressure, echo=FALSE}
+```{r overview5, echo=FALSE}
+summary(human)
+plot(human, col="light green")
+
+
+
+```
+
+
+## Principal component analysis (PCA)
+
+To perform PCA on the data frame, I have to first modify the data frame to make it numeric. First turn GNI into numeric form instead of factor and then remove column X from the data frame, since it contains string formed names.
+
+```{r pca1, echo=FALSE}
+library(stringr)
+human$GNI<- str_replace(human$GNI, pattern=",", replace ="") %>% as.numeric()
+human_ <- select(human, -X)
+
+
+pca_human <- prcomp(human_)
+
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "light green"))
+
+
+```
+
+
+Above here is the biplot of data frame after PCA. Note that the frame has not been standardized yet, which is why it has a strange shape.
+
+
+```{r pca2, echo=FALSE}
+
+human_std <- scale(human_)
+pca_human2 <- prcomp(human_std)
+
+biplot(pca_human2, choices = 1:2, cex = c(0.8, 0.9), col = c("grey40", "light green"))
+
+
+```
+
+##Multiple correspondence analysis (MCA)
+
+
+In this last part I loaded aother dataset "tea" from FactoMineR- library. This set contains answers from poll on things related to tea time.
+
+
+```{r tea, echo=FALSE}
+
+data(tea)
+str(tea)
+dim(tea)
+
+par(mfrow=c(2,4))
+
+for (i in 1:ncol(tea)) {
+  plot(tea[,i], main=colnames(tea)[i],
+       ylab = "Count", col="light green", las = 2)
+  }
+
+
+```
+
+To perform MCA, I choose variables Tea, Evening, Dinner, Friends and Where.
+
+
+
+```{r tea_analysis, echo=FALSE}
+
+data(tea)
+keep_columns<- c("Tea", "evening", "dinner", "friends", "where")
+tea_time<- select(tea, one_of(keep_columns))
+
+par(mfrow=c(2,5))
+
+for (i in 1:ncol(tea_time)) {
+  plot(tea_time[,i], main=colnames(tea_time)[i],
+       ylab = "Count", col="light green", las = 2)
+  }
+
+
+mca <- MCA(tea_time, graph = FALSE)
+
+summary(mca)
+plot(mca, invisible=c("ind"), habillage = "quali")
 
 ```
 
