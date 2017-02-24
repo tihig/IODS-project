@@ -29,20 +29,28 @@ The structure of the frame shows the 9 variables of this frame. The variables in
 ```{r overview5, echo=FALSE}
 summary(human)
 plot(human, col="light green")
+```
 
+The summary of the variables shows the types of data they hold in. X is as described just a list of country names. Edu2FM is the ratio of secondary education and Labo.FM ratio of labour force participation wrangled in previous exercise. Life Exp shows the life expectancy in different nations where on average people live approximately 71 years. Expected years of education (Edu.exp) shows that in minimum people go to school for is 5 years.  
 
+```{r plots5, echo=FALSE}
+library(stringr)
+library(corrplot)
+human$GNI<- str_replace(human$GNI, pattern=",", replace ="") %>% as.numeric()
+human_ <- select(human, -X)
+
+cor_matrix<-cor(human_) %>% round(digits= 2)
+corrplot(cor_matrix, type="upper", cl.pos="b", tl.pos="d", tl.cex = 0.6, method="circle")
 
 ```
 
+The correlation plot shows that there are strong correlations between the variables. In this graph clearly life expectancy and expected years of education correlate positively. 
 
 ## Principal component analysis (PCA)
 
-To perform PCA on the data frame, I have to first modify the data frame to make it numeric. First turn GNI into numeric form instead of factor and then remove column X from the data frame, since it contains string formed names.
+To perform PCA on the data frame, I have to first modify the data frame to make it numeric. First turn GNI into numeric form instead of factor and then remove column X from the data frame, since it contains string formed names. This has been already done for the correlation matrix in previous paragraph.
 
 ```{r pca1, echo=FALSE}
-library(stringr)
-human$GNI<- str_replace(human$GNI, pattern=",", replace ="") %>% as.numeric()
-human_ <- select(human, -X)
 
 
 pca_human <- prcomp(human_)
@@ -53,7 +61,7 @@ biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "light green
 ```
 
 
-Above here is the biplot of data frame after PCA. Note that the frame has not been standardized yet, which is why it has a strange shape.
+Above here is the biplot of data frame after PCA. The frame has not been standardized yet, which is why it has a strange shape. PCA maximizes the variance between variables and therefore without standardizing they tend to pack tightly or show only observations of one variable clearly. Some more information about why standardizing is needed are here: [Why do we need to normalize data before analysis?](http://stats.stackexchange.com/questions/69157/why-do-we-need-to-normalize-data-before-analysis)
 
 
 ```{r pca2, echo=FALSE}
@@ -66,10 +74,14 @@ biplot(pca_human2, choices = 1:2, cex = c(0.8, 0.9), col = c("grey40", "light gr
 
 ```
 
+From the vectors, we can conclude the correlations from aboves correlation matrix. There are clearly three groups of correlation that are recognizable from the vectors. Life expectancy and expected education come close to PC2 and point close to each other. Proportion of womens seats in parliament correlate with labour force participation rate mean.
+
+
 ##Multiple correspondence analysis (MCA)
 
 
-In this last part I loaded aother dataset "tea" from FactoMineR- library. This set contains answers from poll on things related to tea time.
+
+In this last part I loaded another dataset "tea" from FactoMineR- library to perform another dimension reduction technique, Multiple Correspondence analysis (MCA in short). This set contains answers from poll on things related to tea time. The structure and the dimensions of the data frame can be seen from below.
 
 
 ```{r tea, echo=FALSE}
@@ -78,10 +90,14 @@ data(tea)
 str(tea)
 dim(tea)
 
-par(mfrow=c(2,4))
 
-for (i in 1:ncol(tea)) {
-  plot(tea[,i], main=colnames(tea)[i],
+keep_columns<- c("Tea", "evening", "dinner", "friends", "where")
+tea_time<- select(tea, one_of(keep_columns))
+
+par(mfrow=c(2,3))
+
+for (i in 1:ncol(tea_time)) {
+  plot(tea_time[,i], main=colnames(tea_time)[i],
        ylab = "Count", col="light green", las = 2)
   }
 
@@ -94,22 +110,12 @@ To perform MCA, I choose variables Tea, Evening, Dinner, Friends and Where.
 
 ```{r tea_analysis, echo=FALSE}
 
-data(tea)
-keep_columns<- c("Tea", "evening", "dinner", "friends", "where")
-tea_time<- select(tea, one_of(keep_columns))
-
-par(mfrow=c(2,5))
-
-for (i in 1:ncol(tea_time)) {
-  plot(tea_time[,i], main=colnames(tea_time)[i],
-       ylab = "Count", col="light green", las = 2)
-  }
-
-
 mca <- MCA(tea_time, graph = FALSE)
 
 summary(mca)
 plot(mca, invisible=c("ind"), habillage = "quali")
 
 ```
+
+Clearly three variables stand from the crowd: dinner, tea shop and green tea. They do not come close to the dimensions and dinner and tea shop even correlate with each other. All the other variables gather around the origo of dimension values and do not oppse any particular dimension.
 
